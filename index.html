@@ -106,3 +106,45 @@
     </script>
 </body>
 </html>
+<script>
+    function bookTime() {
+        let name = document.getElementById("name").value;
+        let email = document.getElementById("email").value;
+        let time = document.getElementById("time").value;
+
+        if (name === "" || email === "") {
+            alert("Vänligen fyll i alla fält!");
+            return;
+        }
+
+        db.collection("bookings").doc(time).get().then((doc) => {
+            if (doc.exists) {
+                alert("Denna tid är redan bokad!");
+            } else {
+                db.collection("bookings").doc(time).set({
+                    name: name,
+                    email: email
+                }).then(() => {
+                    alert("Bokningen är bekräftad!");
+                    loadBookings();
+                });
+            }
+        });
+    }
+
+    function loadBookings() {
+        let bookingList = document.getElementById("bookingList");
+        bookingList.innerHTML = "";
+
+        db.collection("bookings").get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                let li = document.createElement("li");
+                li.textContent = `${doc.id} - ${data.name} (${data.email})`;
+                bookingList.appendChild(li);
+            });
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", loadBookings);
+</script>

@@ -7,98 +7,102 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            max-width: 400px;
+            max-width: 600px;
             margin: auto;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            padding: 20px;
         }
-        input {
-            width: 90%;
-            padding: 10px;
+        label, input, select, button {
+            display: block;
             margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
         }
         button {
-            background: #28a745;
+            padding: 10px;
+            background-color: green;
             color: white;
             border: none;
-            padding: 10px;
-            width: 100%;
             cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
         }
-        button:hover {
-            background: #218838;
+        button:disabled {
+            background-color: gray;
         }
-        #booking-list {
+        .bookings {
             margin-top: 20px;
-            text-align: left;
         }
     </style>
 </head>
 <body>
+    <h1>Bokningssida</h1>
 
-    <div class="container">
-        <h2>Boka din plats</h2>
-        <input type="text" id="name" placeholder="Ditt namn" required>
-        <input type="email" id="email" placeholder="Din e-post" required>
-        <button onclick="addBooking()">Boka nu</button>
+    <label for="name">Namn:</label>
+    <input type="text" id="name" required>
 
-        <h3>Bokade deltagare:</h3>
-        <ul id="booking-list"></ul>
-    </div>
+    <label for="email">E-post:</label>
+    <input type="email" id="email" required>
+
+    <label for="time">Välj en tid:</label>
+    <select id="time">
+        <option value="10:00">10:00</option>
+        <option value="11:00">11:00</option>
+        <option value="12:00">12:00</option>
+        <option value="13:00">13:00</option>
+        <option value="14:00">14:00</option>
+    </select>
+
+    <button onclick="bookTime()">Boka</button>
+
+    <h2>Bokade tider</h2>
+    <ul id="bookingList"></ul>
 
     <script>
-        // Ladda bokningar från LocalStorage när sidan laddas
-        window.onload = function() {
-            loadBookings();
-        };
+        document.addEventListener("DOMContentLoaded", loadBookings);
 
-        function addBooking() {
-            var name = document.getElementById("name").value;
-            var email = document.getElementById("email").value;
+        function bookTime() {
+            let name = document.getElementById("name").value;
+            let email = document.getElementById("email").value;
+            let time = document.getElementById("time").value;
 
             if (name === "" || email === "") {
-                alert("Fyll i alla fält!");
+                alert("Vänligen fyll i alla fält!");
                 return;
             }
 
-            var booking = { name: name, email: email };
-            saveBooking(booking);
-            displayBooking(booking);
+            // Hämta befintliga bokningar
+            let bookings = JSON.parse(localStorage.getItem("bookings")) || {};
 
-            // Rensa fälten efter bokning
-            document.getElementById("name").value = "";
-            document.getElementById("email").value = "";
-        }
+            // Kontrollera om tiden redan är bokad
+            if (bookings[time]) {
+                alert("Denna tid är redan bokad!");
+                return;
+            }
 
-        function saveBooking(booking) {
-            var bookings = JSON.parse(localStorage.getItem('bookings')) || [];
-            bookings.push(booking);
-            localStorage.setItem('bookings', JSON.stringify(bookings));
+            // Spara bokningen
+            bookings[time] = { name, email };
+            localStorage.setItem("bookings", JSON.stringify(bookings));
+
+            alert("Bokningen är bekräftad!");
+            loadBookings();
         }
 
         function loadBookings() {
-            var bookings = JSON.parse(localStorage.getItem('bookings')) || [];
-            bookings.forEach(displayBooking);
-        }
+            let bookingList = document.getElementById("bookingList");
+            bookingList.innerHTML = "";
 
-        function displayBooking(booking) {
-            var bookingList = document.getElementById("booking-list");
-            var li = document.createElement("li");
-            li.textContent = booking.name + " (" + booking.email + ")";
-            bookingList.appendChild(li);
+            let bookings = JSON.parse(localStorage.getItem("bookings")) || {};
+
+            Object.keys(bookings).forEach(time => {
+                let li = document.createElement("li");
+                li.textContent = `${time} - ${bookings[time].name} (${bookings[time].email})`;
+                bookingList.appendChild(li);
+
+                // Gråa ut bokade tider
+                let select = document.getElementById("time");
+                for (let option of select.options) {
+                    if (option.value === time) {
+                        option.disabled = true;
+                    }
+                }
+            });
         }
     </script>
-
 </body>
 </html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bokningssida</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            max-width: 400px;
+            margin: auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        #booking-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Boka din plats</h2>
+        <input type="text" id="name" placeholder="Ditt namn" required>
+        <input type="email" id="email" placeholder="Din e-post" required>
+        <button onclick="addBooking()">Boka nu</button>
+
+        <h3>Bokade deltagare:</h3>
+        <ul id="booking-list"></ul>
+    </div>
+
+    <script>
+        // Ladda bokningar från LocalStorage när sidan laddas
+        window.onload = function() {
+            loadBookings();
+        };
+
+        function addBooking() {
+            var name = document.getElementById("name").value;
+            var email = document.getElementById("email").value;
+
+            if (name === "" || email === "") {
+                alert("Fyll i alla fält!");
+                return;
+            }
+
+            var booking = { name: name, email: email };
+            saveBooking(booking);
+            displayBooking(booking);
+
+            // Rensa fälten efter bokning
+            document.getElementById("name").value = "";
+            document.getElementById("email").value = "";
+        }
+
+        function saveBooking(booking) {
+            var bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+            bookings.push(booking);
+            localStorage.setItem('bookings', JSON.stringify(bookings));
+        }
+
+        function loadBookings() {
+            var bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+            bookings.forEach(displayBooking);
+        }
+
+        function displayBooking(booking) {
+            var bookingList = document.getElementById("booking-list");
+            var li = document.createElement("li");
+            li.textContent = booking.name + " (" + booking.email + ")";
+            bookingList.appendChild(li);
+        }
+    </script>
+
+</body>
+</html>
